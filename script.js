@@ -27,14 +27,14 @@ document.getElementById('year').textContent = new Date().getFullYear();
 
 // Schedule data
 const schedule = [
-  { day: 'Monday', classes: [{ time: '07:00', level: 'All Levels' }, { time: '18:00', level: 'Beginner' }, { time: '20:00', level: 'Advanced' }] },
-  { day: 'Tuesday', classes: [{ time: '06:30', level: 'Conditioning' }, { time: '19:00', level: 'Intermediate' }, { time: '20:30', level: 'Sparring' }] },
-  { day: 'Wednesday', classes: [{ time: '07:00', level: 'All Levels' }, { time: '18:00', level: 'Beginner' }, { time: '20:00', level: 'Advanced' }] },
-  { day: 'Thursday', classes: [{ time: '06:30', level: 'Conditioning' }, { time: '19:00', level: 'Intermediate' }, { time: '20:30', level: 'Sparring' }] },
-  { day: 'Friday', classes: [{ time: '07:00', level: 'All Levels' }, { time: '18:00', level: 'Technique' }, { time: '19:30', level: 'Advanced' }] },
-  { day: 'Saturday', classes: [{ time: '09:00', level: 'Open Mat' }, { time: '10:30', level: 'Kids' }] },
-  { day: 'Sunday', classes: [{ time: 'Rest', level: 'Recover & Repeat' }] },
-  { day: 'Private', classes: [{ time: 'By appt.', level: '1-on-1 coaching' }] },
+  { day: 'Segunda', classes: [{ time: '15:30', level: 'Treino Misto' }, { time: '17:00', level: 'Treino Misto' }, { time: '18:00', level: 'Infantil' },{ time: '19:00', level: 'Treino Misto' }] },
+  { day: 'Terça', classes: [{ time: '17:00', level: 'Treino Misto' }, { time: '18:00', level: 'Infantil' }, { time: '19:00', level: 'Treino Misto' }] },
+  { day: 'Quarta', classes: [{ time: '15:30', level: 'Treino Misto' }, { time: '17:00', level: 'Treino Misto' },{ time: '18:00', level: 'Infantil' }, { time: '19:00', level: 'Treino Misto' }] },
+  { day: 'Quinta', classes: [{ time: '15:30', level: 'Treino Misto' }, { time: '17:00', level: 'Treino Misto' }, { time: '19:00', level: 'Treino Misto' }] },
+  { day: 'Sexta', classes: [{ time: '15:30', level: 'Treino Misto' }, { time: '17:00', level: 'Treino Misto' }, { time: '18:00', level: 'Infantil' }] },
+  { day: 'Sábado', classes: [{ time: 'Descanso', level: 'Recuperar e Repetir' }] },
+  { day: 'Domingo', classes: [{ time: 'Descanso', level: 'Recuperar e Repetir' }] },
+  { day: 'Particular', classes: [{ time: 'Agendado', level: 'Treinamento 1 a 1' }] },
 ];
 
 const scheduleGrid = document.getElementById('scheduleGrid');
@@ -52,12 +52,12 @@ scheduleGrid.innerHTML = schedule.map(d => `
 
 // Reviews data
 const reviews = [
-  { name: 'Lucas Ferreira', text: "Amazing environment and very attentive coaches! I've evolved more in 3 months than in years elsewhere.", rating: 5 },
-  { name: 'Mariana Silva', text: 'Best Muay Thai gym in the region! Professional, clean, and welcoming for women.', rating: 5 },
-  { name: 'Rafael Costa', text: 'The coaches really care about your technique. Got me ready for my first amateur fight.', rating: 5 },
-  { name: 'Beatriz Almeida', text: "I came for fitness, stayed for the family vibe. Best decision I've made this year.", rating: 5 },
-  { name: 'Diego Martins', text: 'World-class structure right here in Prudente. Worth every centavo.', rating: 5 },
-  { name: 'Camila Rocha', text: 'Beginners are taken seriously. I went from zero to competing in 8 months.', rating: 5 },
+  { name: 'Lucas Ferreira', text: 'Ambiente incrível e treinadores muito atenciosos! Evoluí mais em 3 meses do que em anos em outros lugares.', rating: 5 },
+  { name: 'Mariana Silva', text: 'Melhor academia de Muay Thai da região! Profissional, limpa e acolhedora para mulheres.', rating: 5 },
+  { name: 'Rafael Costa', text: 'Os treinadores realmente se importam com a sua técnica. Me prepararam para minha primeira luta amadora.', rating: 5 },
+  { name: 'Beatriz Almeida', text: 'Vim pela forma física, fiquei pelo clima de família. Melhor decisão que tomei este ano.', rating: 5 },
+  { name: 'Diego Martins', text: 'Matriculei meu filho e foi a melhor decisão que tomei. Em poucos meses ele ganhou disciplina, confiança e foco nos estudos. O ambiente é seguro e os professores tratam as crianças com muito carinho e responsabilidade.', rating: 5 },
+  { name: 'Camila Rocha', text: 'Iniciantes são levados a sério. Fui do zero a competir em 8 meses.', rating: 5 },
 ];
 
 const reviewsGrid = document.getElementById('reviewsGrid');
@@ -80,6 +80,61 @@ const form = document.getElementById('contactForm');
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   const data = new FormData(form);
-  const msg = `Hi! I'm ${data.get('name')} (${data.get('phone')}). ${data.get('message')}`;
+  const msg = `Olá! Sou ${data.get('name')} (${data.get('phone')}). ${data.get('message')}`;
   window.open(`https://wa.me/5518999999999?text=${encodeURIComponent(msg)}`, '_blank');
+});
+
+// ========== Scroll Fade-In Animations ==========
+const animateObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('is-visible');
+      animateObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('[data-animate]').forEach((el, i) => {
+  // Add stagger delay classes to stat-cards within achievements
+  const parent = el.closest('.achievements-grid');
+  if (parent && el.classList.contains('stat-card')) {
+    const cards = parent.querySelectorAll('.stat-card');
+    const index = Array.from(cards).indexOf(el);
+    if (index >= 0) el.classList.add(`delay-${index + 1}`);
+  }
+  animateObserver.observe(el);
+});
+
+// ========== Number Counter Animation ==========
+function animateCounter(el) {
+  const target = parseInt(el.dataset.count, 10);
+  const suffix = el.dataset.suffix || '';
+  const duration = 2000; // ms
+  const startTime = performance.now();
+
+  function update(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    // Ease out cubic for smooth deceleration
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = Math.round(eased * target);
+    el.textContent = current + suffix;
+    if (progress < 1) {
+      requestAnimationFrame(update);
+    }
+  }
+  requestAnimationFrame(update);
+}
+
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      animateCounter(entry.target);
+      counterObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.stat-big[data-count]').forEach((el) => {
+  counterObserver.observe(el);
 });
