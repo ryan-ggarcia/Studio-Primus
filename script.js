@@ -95,7 +95,7 @@ function bindReviewActions() {
       ], { duration: 300 });
       // Open WhatsApp chat with prefilled message referencing the review author
       const msg = `Olá! Vi o depoimento do ${author} no site e gostaria de saber mais.`;
-      window.open(`https://wa.me/5518999999999?text=${encodeURIComponent(msg)}`, '_blank');
+      window.open(`https://wa.me/5518991615722?text=${encodeURIComponent(msg)}`, '_blank');
     });
   });
 }
