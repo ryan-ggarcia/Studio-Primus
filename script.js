@@ -61,8 +61,9 @@ const reviews = [
 ];
 
 const reviewsGrid = document.getElementById('reviewsGrid');
-reviewsGrid.innerHTML = reviews.map(r => `
-  <div class="review-card">
+const reviewCard = r => `
+  <div class="review-card" data-author="${r.name}">
+    <button class="review-action" aria-label="Abrir conversa"><i data-lucide="message-circle"></i></button>
     <div class="review-stars">${Array.from({ length: r.rating }).map(() => '<i data-lucide="star" style="fill:currentColor"></i>').join('')}</div>
     <p class="review-text">"${r.text}"</p>
     <div class="review-author">
@@ -70,10 +71,37 @@ reviewsGrid.innerHTML = reviews.map(r => `
       <div class="review-name">${r.name}</div>
     </div>
   </div>
-`).join('');
+`;
+// Duplicate cards for infinite marquee scroll on mobile
+const allCards = reviews.map(reviewCard).join('');
+reviewsGrid.innerHTML = allCards + allCards;
 
 // Re-render icons after dynamic content
 if (window.lucide) window.lucide.createIcons();
+
+// Add event listeners to review action buttons (mobile)
+function bindReviewActions() {
+  const actions = document.querySelectorAll('.review-action');
+  actions.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const card = btn.closest('.review-card');
+      const author = card?.dataset.author || '';
+      // Brief pulse animation to highlight
+      card.animate([
+        { transform: 'scale(1)', boxShadow: 'var(--shadow-card)' },
+        { transform: 'scale(1.02)', boxShadow: 'var(--shadow-elevated)' },
+        { transform: 'scale(1)', boxShadow: 'var(--shadow-card)' }
+      ], { duration: 300 });
+      // Open WhatsApp chat with prefilled message referencing the review author
+      const msg = `Olá! Vi o depoimento do ${author} no site e gostaria de saber mais.`;
+      window.open(`https://wa.me/5518999999999?text=${encodeURIComponent(msg)}`, '_blank');
+    });
+  });
+}
+
+// Bind after DOM insert
+bindReviewActions();
 
 // Contact form -> WhatsApp
 const form = document.getElementById('contactForm');
@@ -138,3 +166,16 @@ const counterObserver = new IntersectionObserver((entries) => {
 document.querySelectorAll('.stat-big[data-count]').forEach((el) => {
   counterObserver.observe(el);
 });
+
+// Make the swipe-hint a clickable CTA (mobile)
+// (function bindSwipeHint() {
+//   const swipe = document.querySelector('.swipe-hint');
+//   if (!swipe) return;
+//   swipe.setAttribute('role', 'button');
+//   swipe.tabIndex = 0;
+//   const openWA = () => window.open('https://wa.me/5518999999999', '_blank');
+//   swipe.addEventListener('click', openWA);
+//   swipe.addEventListener('keydown', (e) => {
+//     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openWA(); }
+//   });
+// })();
