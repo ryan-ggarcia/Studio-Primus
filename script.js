@@ -103,13 +103,114 @@ function bindReviewActions() {
 // Bind after DOM insert
 bindReviewActions();
 
-// Contact form -> WhatsApp
+// Contact form -> WhatsApp with phone mask and message moderation
 const form = document.getElementById('contactForm');
+const phoneInput = form.querySelector('input[name="phone"]');
+const messageInput = form.querySelector('textarea[name="message"]');
+
+function onlyDigits(str) { return String(str).replace(/\D/g, ''); }
+function normalizeText(str) { return String(str).normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase(); }
+
+function formatBRPhone(value) {
+  const d = onlyDigits(value);
+  if (!d) return '';
+  if (d.length <= 2) return '(' + d;
+  if (d.length <= 6) return '(' + d.slice(0,2) + ') ' + d.slice(2);
+  if (d.length <= 10) return '(' + d.slice(0,2) + ') ' + d.slice(2,6) + '-' + d.slice(6);
+  // 11+ digits (mobile with 9)
+  return '(' + d.slice(0,2) + ') ' + d.slice(2,7) + '-' + d.slice(7,11);
+}
+
+// Simple blacklist of offensive words (adjustable). We normalize accents before check.
+const offensiveWords = ['idiota','burro','imbecil','otario','palhaco','palhaço','estupido'];
+
+// show inline error under input
+function showFieldError(field, message) {
+  clearFieldError(field);
+  const el = document.createElement('div');
+  el.className = 'input-error';
+  el.textContent = message;
+  field.parentNode.appendChild(el);
+}
+function clearFieldError(field) {
+  const next = field.parentNode.querySelector('.input-error');
+  if (next) next.remove();
+}
+
+// Mask phone while typing
+phoneInput.addEventListener('input', (e) => {
+  const pos = e.target.selectionStart;
+  e.target.value = formatBRPhone(e.target.value);
+  // move cursor to end (simpler and reliable)
+  e.target.selectionStart = e.target.selectionEnd = e.target.value.length;
+  clearFieldError(phoneInput);
+});
+
+// Remove errors when user types message
+messageInput.addEventListener('input', () => clearFieldError(messageInput));
+
+// Enhanced phone validation using google-libphonenumber (if available)
+function isValidPhoneNumberBR(digits) {
+  // digits: only numbers string
+  try {
+    if (!window.libphonenumber) return null; // library not loaded
+    const phoneUtil = window.libphonenumber.PhoneNumberUtil.getInstance();
+    const number = phoneUtil.parseAndKeepRawInput(digits, 'BR');
+    const isPossible = phoneUtil.isPossibleNumber(number);
+    const isValid = phoneUtil.isValidNumber(number);
+    return { isPossible, isValid };
+  } catch (err) {
+    return null;
+  }
+}
+
+// Submit handler re-defined with enhanced phone validation
+form.removeEventListener && form.removeEventListener('submit', () => {});
 form.addEventListener('submit', (e) => {
   e.preventDefault();
+  clearFieldError(phoneInput);
+  clearFieldError(messageInput);
+
   const data = new FormData(form);
-  const msg = `Olá! Sou ${data.get('name')} (${data.get('phone')}). ${data.get('message')}`;
-  window.open(`https://wa.me/5518999999999?text=${encodeURIComponent(msg)}`, '_blank');
+  const name = (data.get('name') || '').trim();
+  const phoneRaw = data.get('phone') || '';
+  const phoneDigits = onlyDigits(phoneRaw);
+  const message = (data.get('message') || '').trim();
+
+  // Validate phone length quickly
+  if (phoneDigits.length < 10 || phoneDigits.length > 11) {
+    showFieldError(phoneInput, 'Digite um telefone válido com DDD (10 ou 11 dígitos).');
+    phoneInput.focus();
+    return;
+  }
+
+  // If libphonenumber is present, use it
+  const libCheck = isValidPhoneNumberBR(phoneRaw);
+  if (libCheck) {
+    if (!libCheck.isPossible) {
+      showFieldError(phoneInput, 'Número de telefone improvável para o Brasil. Verifique os dígitos.');
+      phoneInput.focus();
+      return;
+    }
+    if (!libCheck.isValid) {
+      showFieldError(phoneInput, 'Número inválido. Verifique o DDD e o número.');
+      phoneInput.focus();
+      return;
+    }
+  }
+
+  // Check offensive vocabulary
+  const normalized = normalizeText(message);
+  const found = offensiveWords.find(w => new RegExp('\\b' + w + '\\b', 'i').test(normalized));
+  if (found) {
+    showFieldError(messageInput, 'Sua mensagem contém palavras não permitidas. Por favor, reformule.');
+    messageInput.focus();
+    return;
+  }
+
+  // All good -> open WhatsApp
+  const msg = `Olá! Sou ${name} (${formatBRPhone(phoneDigits)}). ${message}`;
+  window.open(`https://wa.me/5518991615722?text=${encodeURIComponent(msg)}`, '_blank');
 });
 
 // ========== Scroll Fade-In Animations ==========

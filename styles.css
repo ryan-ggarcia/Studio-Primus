@@ -458,6 +458,16 @@ ul { list-style: none; }
   outline: none; transition: box-shadow 0.2s, border-color 0.2s; resize: none;
 }
 .contact-form input:focus, .contact-form textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(212,175,55,0.25); }
+.input-error {
+  color: #a11; /* soft red */
+  font-size: 0.85rem;
+  margin-top: 0.45rem;
+}
+
+.contact-form input:invalid, .contact-form textarea:invalid {
+  box-shadow: 0 0 0 3px rgba(161,17,17,0.06);
+  border-color: rgba(161,17,17,0.3);
+}
 
 /* Final CTA */
 .final-cta { background: var(--grad-soft-gold); border-radius: 1.5rem; padding: 2rem 1.25rem; text-align: center; box-shadow: var(--shadow-elevated); position: relative; overflow: hidden; }
